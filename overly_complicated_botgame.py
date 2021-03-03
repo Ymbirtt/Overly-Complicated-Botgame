@@ -11,6 +11,7 @@ TOKEN = config['token']
 GUILD_ID = config['guild_id']
 CHANNEL_NAME = config['channel_name']
 CLIENT = discord.Client()
+POLL_TABLE_MARKER = "{polltable}"
 CHECK = "✅"
 THUMB = "👍"
 
@@ -79,7 +80,6 @@ async def generate_poll_table(channel, check_mark=CHECK):
 
     attendees = await thumb_react.users().flatten()
 
-    print("Here's how it breaks down:")
     table = Texttable()
     table.set_cols_align(["r"] + ["c" for _ in attendees])
     table.set_max_width(10000)
@@ -93,12 +93,23 @@ async def generate_poll_table(channel, check_mark=CHECK):
 
 
 async def print_poll_table(channel):
+    print("Here's how it breaks down:")
     print(await generate_poll_table(channel))
 
 
 async def post_poll_table(channel):
     table = await generate_poll_table(channel, check_mark="✔")
-    await channel.send("```\n" + table + "\n```")
+    poll_message = await channel.history().\
+            filter(lambda m: m.author == CLIENT.user and m.content.startswith(POLL_TABLE_MARKER)).\
+            flatten()
+    table_text = POLL_TABLE_MARKER + "\n```\n" + table + "\n```"
+    if poll_message:
+        print("Updating old poll message")
+        await poll_message[0].edit(content=table_text)
+    else:
+        print("Posting new poll message")
+        await channel.send(table_text)
+    print("Done! Have a nice day 😊")
 
 
 async def clear_messages(channel):
