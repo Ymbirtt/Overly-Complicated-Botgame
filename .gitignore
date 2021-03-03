@@ -1,3 +1,4 @@
 config.yaml
 venv/*
 .*.sw?
+last_run.out
