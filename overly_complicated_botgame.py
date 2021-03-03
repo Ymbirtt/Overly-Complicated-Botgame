@@ -139,7 +139,7 @@ async def run_bot():
 
     if args.action == "print_table":
         await print_poll_table(channel)
-    if args.action == "post_table":
+    elif args.action == "post_table":
         await post_poll_table(channel)
     elif args.action == "clear_messages":
         await clear_messages(channel)
