@@ -13,7 +13,8 @@ CHANNEL_NAME = config['channel_name']
 CLIENT = discord.Client()
 POLL_TABLE_MARKER = "{polltable}"
 CHECK = "✅"
-THUMB = "👍"
+THUMB_UP = "👍"
+THUMB_DOWN = "👎"
 
 
 def get_react_name(react):
@@ -75,8 +76,8 @@ async def generate_poll_table(channel, check_mark=CHECK):
     print_in_box(poll_message.content)
     print()
 
-    thumb_react = discord.utils.get(poll_message.reactions, emoji=THUMB)
-    other_reacts = [r for r in poll_message.reactions if r.emoji != THUMB]
+    thumb_react = discord.utils.get(poll_message.reactions, emoji=THUMB_UP)
+    other_reacts = [r for r in poll_message.reactions if r.emoji not in (THUMB_UP, THUMB_DOWN)]
 
     attendees = await thumb_react.users().flatten()
 
