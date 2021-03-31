@@ -4,7 +4,7 @@ cd "$(dirname -- "$0")"
 pwd
 
 source venv/bin/activate
-python overly_complicated_botgame.py post_table > last_run.out
+python overly_complicated_botgame.py draw_table > last_run.out
 
 if [ $? -ne 0 ]
 then
