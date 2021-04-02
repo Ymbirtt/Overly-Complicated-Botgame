@@ -188,7 +188,7 @@ async def clear_messages(channel):
 async def run_bot():
     parser = ArgumentParser(description="Do some basic admin in the OCB discord channel")
 
-    valid_actions = ["print_table", "clear_messages", "post_table"]
+    valid_actions = ["print_table", "clear_messages", "post_table", "draw_table"]
     parser.add_argument('action', help=f"The action to perform - one of {valid_actions}")
     args = parser.parse_args()
     guild = discord.utils.get(CLIENT.guilds, id=GUILD_ID)
