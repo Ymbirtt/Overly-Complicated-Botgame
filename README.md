@@ -15,7 +15,7 @@ point correctly at our channel and server, but feel free to change those fields
 if you want to run the bot in your own fun channel.
 
 ```
-$ git clone [OCB url]
+$ git clone https://github.com/Ymbirtt/Overly-Complicated-Botgame.git
 $ cd overly_complicated_botgame
 $ virtualenv venv -p python3
 $ source venv/bin/activate
