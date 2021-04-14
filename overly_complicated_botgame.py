@@ -6,6 +6,7 @@ from texttable import Texttable
 from collections import defaultdict
 from table_drawer import TableDrawer
 from io import BytesIO
+from PIL import Image
 
 with open("config.yaml", 'r') as f:
     config = yaml.safe_load(f)
@@ -113,7 +114,7 @@ async def generate_poll_data(channel, check_mark=CHECK):
 
     non_voters = set(attendees) - set(table_data.keys())
     for non_voter in non_voters:
-        table_data[non_voter] = other_reacts[:]
+        table_data[non_voter] = []
 
     return table_data
 
@@ -139,6 +140,15 @@ async def draw_poll_table(channel):
         print("Posting new poll message")
     await channel.send(POLL_TABLE_MARKER, file=table_file)
     print("Done! Have a nice day 😊")
+
+
+async def preview_poll_table(channel):
+    table_data = await generate_poll_data(channel)
+    table_image = await TableDrawer.default_draw(table_data)
+    alpha = table_image.getchannel("A")
+    bg = Image.new("RGBA", table_image.size, (0, 0, 0, 255))
+    bg.paste(table_image, mask=alpha)
+    bg.show()
 
 
 async def print_poll_table(channel):
@@ -188,7 +198,8 @@ async def clear_messages(channel):
 async def run_bot():
     parser = ArgumentParser(description="Do some basic admin in the OCB discord channel")
 
-    valid_actions = ["print_table", "clear_messages", "post_table", "draw_table"]
+    valid_actions = ["print_table", "clear_messages", "post_table",
+            "draw_table", "preview_table"]
     parser.add_argument('action', help=f"The action to perform - one of {valid_actions}")
     args = parser.parse_args()
     guild = discord.utils.get(CLIENT.guilds, id=GUILD_ID)
@@ -205,6 +216,8 @@ async def run_bot():
         await post_poll_table(channel)
     elif args.action == "draw_table":
         await draw_poll_table(channel)
+    elif args.action == "preview_table":
+        await preview_poll_table(channel)
     elif args.action == "clear_messages":
         await clear_messages(channel)
     else:

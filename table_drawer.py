@@ -1,7 +1,8 @@
 from PIL import Image
 from io import BytesIO
-import requests
 from twemoji_parser import emoji_to_url
+import requests
+import math
 
 
 def get_react_name(react):
@@ -64,8 +65,8 @@ class TableDrawer:
         for reacts in table_data.values():
             games |= set(reacts)
         games = list(games)
-        games.sort(key=get_react_name)
-        users.sort(key=lambda x: x.name)
+        games.sort(key=lambda game: -len([user for user in users if game in table_data[user]]))
+        users.sort(key=lambda user: len(table_data[user]) if len(table_data[user]) > 0 else math.inf)
 
         num_cols = len(users)
         num_rows = len(games) + 1
