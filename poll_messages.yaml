@@ -1,0 +1,21 @@
+---
+scheduled_messages:
+    - when: "18th of June"
+      message: "Hello friends! I have taken over from @ymbirtt so that he doesn't have to talk to you any more! Poll messages look like this now. This tool supports both scheduled messages and a set of random messages. If you want to add something dumb to the set of random messages, @ymbirtt can add it to the file. If you have a birthday coming up or a new game or something, let @ymbirtt know and he can add it to my schedule, and then the text will appear in the poll like magic. In fact, this entire poll message came out of that same scheduler! How clever! Anyway..."
+
+random_messages:
+    - "Vote for some games! Remember, decisiveness is a virtue in these polls!"
+    - "Board games? Board games!"
+    - "That was fun. Let's do it again!"
+    - "I'm sure you guys had fun last time but you never invite me and I bet you won't again :("
+    - "Gee whiz, voting for Terra Mystica again? How original..."
+    - "Hrm... what shall we play this week?"
+    - "After the apocalypse, Victory Points will be the only currency that matters, and we will all rule as monarchs "
+    - "Economic Meeple Builders with Production Needs and Trains: The Board Game"
+    - "This poll is rigged - Justin Beiber: Always be Mine is guaranteed to win"
+    - "borgar"
+    - "I only have finitely many of these messages and I delete each one once it's posted. Consistency is the last bastion of the unimaginative."
+    - "You don't need that Kickstarter :|"
+
+default_message: "Games! Games! Games! Let's play games!"
+

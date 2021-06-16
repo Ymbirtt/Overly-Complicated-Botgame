@@ -1,6 +1,9 @@
 import discord
-import yaml
+import ruamel.yaml
 import asyncio
+import parsedatetime
+import dateparser
+import random
 from argparse import ArgumentParser
 from texttable import Texttable
 from collections import defaultdict
@@ -9,7 +12,7 @@ from io import BytesIO
 from PIL import Image
 
 with open("config.yaml", 'r') as f:
-    config = yaml.safe_load(f)
+    config = ruamel.yaml.safe_load(f)
 
 TOKEN = config['token']
 GUILD_ID = config['guild_id']
@@ -19,6 +22,9 @@ POLL_TABLE_MARKER = "{polltable}"
 CHECK = "✅"
 THUMB_UP = "👍"
 THUMB_DOWN = "👎"
+NEXT_GAME_DATE_STR = "next thursday"
+LAST_GAME_DATE_STR = "last thursday"
+POLL_MESSAGE_FILE = "poll_messages.yaml"
 
 
 def get_react_name(react):
@@ -57,6 +63,36 @@ def ask_user_to_select_message(messages):
         except ValueError:
             pass
         print("Invalid input")
+
+
+def generate_poll_message_body(last_date, next_date):
+    with open(POLL_MESSAGE_FILE, 'r') as f:
+        content = f.read()
+    messages = ruamel.yaml.load(content, Loader=ruamel.yaml.RoundTripLoader)
+
+    def parse_scheduled_message(message_struct):
+        dt = dateparser.parse(message_struct["when"])
+        return {"when": dt, "message": message_struct["message"]}
+
+    scheduled_messages = messages["scheduled_messages"]
+
+    for msg_index, scheduled_message in enumerate(scheduled_messages):
+        when = dateparser.parse(scheduled_message["when"])
+        print(last_date)
+        print(when)
+        print(next_date)
+        if last_date < when < next_date:
+            message = scheduled_message["message"]
+            del messages["scheduled_messages"][msg_index]
+            return (message, messages)
+
+    if messages["random_messages"]:
+        random_msg_index = random.randint(0, len(messages["random_messages"]))
+        message = messages["random_messages"][random_msg_index]
+        del messages["random_messages"][random_msg_index]
+        return message, messages
+
+    return messages["default_message"], messages
 
 
 async def generate_text_table(table_data, check_mark=CHECK):
@@ -195,6 +231,29 @@ async def clear_messages(channel):
         print("Confirmation failed - not deleting")
 
 
+async def post_poll_message(channel):
+    cal = parsedatetime.Calendar()
+
+    last_datetime, ret = cal.parseDT(LAST_GAME_DATE_STR)
+    if not ret:
+        raise RuntimeError(f"Could not parse {LAST_GAME_DATE_STR} as a datetime")
+
+    next_datetime, ret = cal.parseDT(NEXT_GAME_DATE_STR)
+    if not ret:
+        raise RuntimeError(f"Could not parse {NEXT_GAME_DATE_STR} as a datetime")
+
+    message_header = "{poll} @everyone"
+    message_body, new_messages_content = generate_poll_message_body(last_datetime, next_datetime)
+    message_footer = f"**Games? {next_datetime.strftime('%d/%m/%Y')}**"
+
+    message = "\n".join([message_header, message_body, "", message_footer])
+
+    await channel.send(message)
+
+    with open(POLL_MESSAGE_FILE, 'w') as f:
+        f.write(ruamel.yaml.dump(new_messages_content, Dumper=ruamel.yaml.RoundTripDumper))
+
+
 async def run_bot():
     parser = ArgumentParser(description="Do some basic admin in the OCB discord channel")
 
@@ -204,6 +263,7 @@ async def run_bot():
         "post_table": post_poll_table,
         "draw_table": draw_poll_table,
         "preview_table": preview_poll_table,
+        "post_poll_message": post_poll_message,
     }
 
     parser.add_argument('action', help=f"The action to perform - one of {action_table.keys()}")
