@@ -198,9 +198,15 @@ async def clear_messages(channel):
 async def run_bot():
     parser = ArgumentParser(description="Do some basic admin in the OCB discord channel")
 
-    valid_actions = ["print_table", "clear_messages", "post_table",
-            "draw_table", "preview_table"]
-    parser.add_argument('action', help=f"The action to perform - one of {valid_actions}")
+    action_table = {
+        "print_table": print_poll_table,
+        "clear_messages": clear_messages,
+        "post_table": post_poll_table,
+        "draw_table": draw_poll_table,
+        "preview_table": preview_poll_table,
+    }
+
+    parser.add_argument('action', help=f"The action to perform - one of {action_table.keys()}")
     args = parser.parse_args()
     guild = discord.utils.get(CLIENT.guilds, id=GUILD_ID)
     if not guild:
@@ -210,16 +216,9 @@ async def run_bot():
     if not channel:
         print("Error: could not find the configured channel - check config.yaml!")
 
-    if args.action == "print_table":
-        await print_poll_table(channel)
-    elif args.action == "post_table":
-        await post_poll_table(channel)
-    elif args.action == "draw_table":
-        await draw_poll_table(channel)
-    elif args.action == "preview_table":
-        await preview_poll_table(channel)
-    elif args.action == "clear_messages":
-        await clear_messages(channel)
+    action_func = action_table.get(args.action)
+    if action_func is not None:
+        await action_func(channel)
     else:
         print(f"Invalid action - I don't know how to {args.action}")
 
