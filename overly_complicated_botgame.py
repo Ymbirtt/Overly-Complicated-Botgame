@@ -78,9 +78,6 @@ def generate_poll_message_body(last_date, next_date):
 
     for msg_index, scheduled_message in enumerate(scheduled_messages):
         when = dateparser.parse(scheduled_message["when"])
-        print(last_date)
-        print(when)
-        print(next_date)
         if last_date < when < next_date:
             message = scheduled_message["message"]
             del messages["scheduled_messages"][msg_index]
