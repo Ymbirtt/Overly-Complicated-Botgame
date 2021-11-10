@@ -1,6 +1,5 @@
 from PIL import Image
 from io import BytesIO
-from twemoji_parser import emoji_to_url
 import requests
 import math
 
@@ -56,7 +55,8 @@ class TableDrawer:
         if react.custom_emoji:
             return await self.image_from_url(react.emoji.url_as(format="png"))
         else:
-            url = await(emoji_to_url(react.emoji))
+            hex_code = '-'.join([format(ord(ch), 'x') for ch in react.emoji])
+            url = "https://twemoji.maxcdn.com/v/latest/72x72/" + hex_code + ".png"
             return await self.image_from_url(url)
 
     async def draw(self, table_data):

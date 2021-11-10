@@ -23,7 +23,6 @@ ruamel.yaml==0.17.9
 ruamel.yaml.clib==0.2.2
 six==1.16.0
 texttable==1.6.3
-twemoji-parser==0.5.1
 typing-extensions==3.7.4.3
 tzlocal==2.1
 urllib3==1.26.4
