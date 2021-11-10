@@ -163,15 +163,24 @@ async def draw_poll_table(channel):
     table_image_handle = BytesIO()
     table_image.save(table_image_handle, 'PNG')
     table_image_handle.seek(0)
-
+    guild = discord.utils.get(CLIENT.guilds, id=GUILD_ID)
+    dump_channel = discord.utils.get(guild.channels, name="dump-channel")
     table_file = discord.File(table_image_handle, "this_weeks_games.png")
+
+    embed = discord.Embed()
+    message = await dump_channel.send(files=[table_file])
+    image_url = message.attachments[0].url
+    embed.set_image(url=image_url)
 
     if table_message:
         print("Updating old poll message")
-        await table_message[0].delete()
+        await table_message[0].edit(embed=embed)
+        dump_messages = (await dump_channel.history(oldest_first=True).filter(lambda m: not m.is_system()).flatten())[:-1]
+        for message in dump_messages:
+            await message.delete()
     else:
         print("Posting new poll message")
-    await channel.send(POLL_TABLE_MARKER, file=table_file)
+        await channel.send(POLL_TABLE_MARKER, embed=embed)
     print("Done! Have a nice day 😊")
 
 
