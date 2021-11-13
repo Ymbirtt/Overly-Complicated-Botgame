@@ -33,7 +33,7 @@ class LiveBot(commands.Bot):
         self.__channel = None
         self.__dump_channel = None
         self.__poll_timer = None
-        coloredlogs.install(level='DEBUG', logger=self.__log)
+        coloredlogs.install(level='INFO', logger=self.__log)
         super().__init__(*args, **kwargs)
 
     async def __find_poll_message(self):
