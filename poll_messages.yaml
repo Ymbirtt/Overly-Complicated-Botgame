@@ -1,21 +1,30 @@
----
-scheduled_messages:
-    - when: "18th of June"
-      message: "Hello friends! I have taken over from @ymbirtt so that he doesn't have to talk to you any more! Poll messages look like this now. This tool supports both scheduled messages and a set of random messages. If you want to add something dumb to the set of random messages, @ymbirtt can add it to the file. If you have a birthday coming up or a new game or something, let @ymbirtt know and he can add it to my schedule, and then the text will appear in the poll like magic. In fact, this entire poll message came out of that same scheduler! How clever! Anyway..."
-
+scheduled_messages: []
 random_messages:
-    - "Vote for some games! Remember, decisiveness is a virtue in these polls!"
-    - "Board games? Board games!"
-    - "That was fun. Let's do it again!"
-    - "I'm sure you guys had fun last time but you never invite me and I bet you won't again :("
-    - "Gee whiz, voting for Terra Mystica again? How original..."
-    - "Hrm... what shall we play this week?"
-    - "After the apocalypse, Victory Points will be the only currency that matters, and we will all rule as monarchs "
-    - "Economic Meeple Builders with Production Needs and Trains: The Board Game"
-    - "This poll is rigged - Justin Beiber: Always be Mine is guaranteed to win"
-    - "borgar"
-    - "I only have finitely many of these messages and I delete each one once it's posted. Consistency is the last bastion of the unimaginative."
-    - "You don't need that Kickstarter :|"
+- 'A board game about running lingerie shops in the midlands. Bras: Birmingham.'
+- A board game about camply deceiving people with old school presentations. Slide-reel
+  con-flounce.
+- How about that game where you have some cubes, but later on you have more cubes?
+- How about that game where you try to put a person somewhere, but someone else has
+  a person there, so you can't?
+- How about that game where you spend most of the game trying to get resources, but
+  then on the last turn you try and turn those resources into points?
+- There will be no dice-rolling in this phase
+- Do not think about where the cubes come from. They are just abstract resources.
+- cows
+- Now, one thing you need to understand about this game is that money is really tight...
+- Leeks is an essential part of games
+- I liked that expansion, we should play it again
+- He is right, it's in an appendix
+- It's only German games where fun is optional
+- It's a kickstarter. I'll update you in 2022
+- This is me prodding you guys to click the thing if you do want to come so I can
+  make sure we've got space in the cafe next week
+- I like it when things I like have an impact on the world
+- We need to play this game more
+- Obviously we should prioritise games with the most amount of touching real stuff
+  per second
+- What was the one where we had wood, had blacksmiths, made metal, wine etc?  We had
+  people and you put them in a hierachy
+- "\U0001F62E Decisiveness! Nani?"
 
-default_message: "Games! Games! Games! Let's play games!"
-
+default_message: Help! I've run out of messages! Someone give me some more!
