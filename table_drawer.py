@@ -41,7 +41,10 @@ class TableDrawer:
         if url in self.__image_cache:
             return self.__image_cache[url]
         response = requests.get(url)
-        image = Image.open(BytesIO(response.content))
+        if not response.ok:
+            image = Image.new('RGBA', (self.__square_size, self.__square_size), "blue")
+        else:
+            image = Image.open(BytesIO(response.content))
 
         image.thumbnail((self.__square_size, self.__square_size))
         image.convert("RGBA")
@@ -55,7 +58,10 @@ class TableDrawer:
         if react.custom_emoji:
             return await self.image_from_url(react.emoji.url_as(format="png"))
         else:
-            hex_code = '-'.join([format(ord(ch), 'x') for ch in react.emoji])
+            emoji = react.emoji
+            # Strip out variant specifiers because they break twemoji
+            emoji = ''.join(ch for ch in react.emoji if ch not in ('\ufe0f', '\ufe0e'))
+            hex_code = '-'.join([format(ord(ch), 'x') for ch in emoji])
             url = "https://twemoji.maxcdn.com/v/latest/72x72/" + hex_code + ".png"
             return await self.image_from_url(url)
 
