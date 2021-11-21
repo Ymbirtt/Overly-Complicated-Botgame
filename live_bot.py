@@ -186,7 +186,7 @@ class LiveBot(commands.Bot):
             year=next_game_date.year,
             month=next_game_date.month,
             day=next_game_date.day,
-            hour=6
+            hour=10
         )
 
         time_until_reset = (next_game_datetime - datetime.now()).total_seconds()
