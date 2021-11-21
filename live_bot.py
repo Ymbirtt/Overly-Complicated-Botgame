@@ -5,7 +5,7 @@ import discord
 import ruamel.yaml
 import dateparser
 import random
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from collections import defaultdict
 from aio_timers import Timer
 from io import BytesIO
@@ -174,14 +174,24 @@ class LiveBot(commands.Bot):
         return messages["default_message"], messages
 
     def __set_reset_timer(self):
-        cal = parsedatetime.Calendar()
-        next_datetime, ret = cal.parseDT(self.next_poll_date_str)
-        if not ret:
-            raise RuntimeError(f"Could not parse {self.next_game_date_str} as a datetime")
+        friday = 4  # python day of week constant meanining Friday
+        today = date.today()
 
-        time_until_reset = (next_datetime - datetime.now()).total_seconds()
+        if today.weekday() <= friday:
+            next_game_date = today + timedelta(days=friday - today.weekday())
+        else:
+            next_game_date = today + timedelta(days=7 + friday - today.weekday())
+
+        next_game_datetime = datetime(
+            year=next_game_date.year,
+            month=next_game_date.month,
+            day=next_game_date.day,
+            hour=6
+        )
+
+        time_until_reset = (next_game_datetime - datetime.now()).total_seconds()
         self.__reset_timer = Timer(time_until_reset, self.__reset_poll, callback_async=True)
-        self.__log.info(f"Set timer to expire at around {next_datetime} - {time_until_reset} seconds from now")
+        self.__log.info(f"Set timer to expire at around {next_game_datetime} - {time_until_reset} seconds from now")
 
     async def __reset_poll(self):
         self.__log.info("Resetting poll")
