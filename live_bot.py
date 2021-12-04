@@ -5,7 +5,7 @@ import discord
 import ruamel.yaml
 import dateparser
 import random
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 from collections import defaultdict
 from aio_timers import Timer
 from io import BytesIO
@@ -175,23 +175,34 @@ class LiveBot(commands.Bot):
 
     def __set_reset_timer(self):
         friday = 4  # python day of week constant meanining Friday
-        today = date.today()
+        now = datetime.now()
+        today = now.date()
 
-        if today.weekday() <= friday:
-            next_game_date = today + timedelta(days=friday - today.weekday())
-        else:
-            next_game_date = today + timedelta(days=7 + friday - today.weekday())
+        if now.weekday() < friday:
+            next_poll_date = today + timedelta(days=friday - today.weekday())
+        elif now.weekday() == friday:
+            if now.hour < 10:
+                next_poll_date = today
+            else:
+                next_poll_date = today + timedelta(days=7)
+        else:  # now.weekday() > friday
+            next_poll_date = today + timedelta(days=7 + friday - today.weekday())
 
-        next_game_datetime = datetime(
-            year=next_game_date.year,
-            month=next_game_date.month,
-            day=next_game_date.day,
+        next_poll_datetime = datetime(
+            year=next_poll_date.year,
+            month=next_poll_date.month,
+            day=next_poll_date.day,
             hour=10
         )
 
-        time_until_reset = (next_game_datetime - datetime.now()).total_seconds()
+        if next_poll_datetime < now:
+            self.__log.error(f"Got a negative time until reset. Your logic is wrong somehow! Now is {now}, and I think the next poll should be at {next_poll_datetime} - patching this hole...")
+            next_poll_datetime += timedelta(days=7)
+
+        time_until_reset = (next_poll_datetime - datetime.now()).total_seconds()
+
         self.__reset_timer = Timer(time_until_reset, self.__reset_poll, callback_async=True)
-        self.__log.info(f"Set timer to expire at around {next_game_datetime} - {time_until_reset} seconds from now")
+        self.__log.info(f"Set timer to expire at around {next_poll_datetime} - {time_until_reset} seconds from now")
 
     async def __reset_poll(self):
         self.__log.info("Resetting poll")
