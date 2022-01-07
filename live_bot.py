@@ -39,7 +39,7 @@ class LiveBot(commands.Bot):
     async def __find_poll_message(self):
         everyone_messages = await \
             self.__channel.history(oldest_first=True)\
-            .filter(lambda m: m.mention_everyone and self.poll_tag in m.content)\
+            .filter(lambda m: self.poll_tag in m.content)\
             .flatten()
 
         if len(everyone_messages) == 1:
