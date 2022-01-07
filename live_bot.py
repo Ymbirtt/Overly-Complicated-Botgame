@@ -24,10 +24,11 @@ class LiveBot(commands.Bot):
     thumb_down = "👎"
     poll_message_file = "poll_messages.yaml"
 
-    def __init__(self, guild_id, channel_name, dump_channel_name, *args, **kwargs):
+    def __init__(self, guild_id, channel_name, dump_channel_name, role_id, *args, **kwargs):
         self.__guild_id = guild_id
         self.__channel_name = channel_name
         self.__dump_channel_name = dump_channel_name
+        self.__role_id = role_id
         self.__log = logging.getLogger(__name__)
         self.__guild = None
         self.__channel = None
@@ -62,7 +63,10 @@ class LiveBot(commands.Bot):
         if not ret:
             raise RuntimeError(f"Could not parse {self.next_game_date_str} as a datetime")
 
-        message_header = f"{self.poll_tag} @everyone"
+        if self.__role_id:
+            message_header = f"{self.poll_tag} <@&{self.__role_id}>"
+        else:
+            message_header = f"{self.poll_tag} @everyone"
         message_body, new_messages_content = self.__generate_poll_message_body(last_datetime, next_datetime)
         message_footer = f"**Games? {next_datetime.strftime('%d/%m/%Y')}**"
 
