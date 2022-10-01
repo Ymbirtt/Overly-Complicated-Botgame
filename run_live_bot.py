@@ -10,7 +10,6 @@ ROLE_ID = os.environ.get('OCB_ROLE_ID', 0)
 
 
 def main():
-    logging.basicConfig(level=logging.DEBUG)
     bot = LiveBot(guild_id=int(GUILD_ID),
                   channel_name=CHANNEL_NAME,
                   dump_channel_name=DUMP_CHANNEL_NAME,

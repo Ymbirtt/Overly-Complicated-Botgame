@@ -13,6 +13,8 @@ from discord.ext import commands
 
 from table_drawer import TableDrawer
 
+discord.VoiceClient.warn_nacl = False
+
 
 class LiveBot(commands.Bot):
     polling_delay = 10

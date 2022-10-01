@@ -1,5 +1,6 @@
 from PIL import Image
 from io import BytesIO
+import logging
 import requests
 import math
 
@@ -17,6 +18,7 @@ class TableDrawer:
         self.__square_size = square_size
         self.__square_padding = square_padding
         self.__image_cache = {}
+        self.__log = logging.getLogger(__name__)
 
     @classmethod
     async def default_draw(cls, table_data):
@@ -43,6 +45,7 @@ class TableDrawer:
         response = requests.get(url)
         if not response.ok:
             image = Image.new('RGBA', (self.__square_size, self.__square_size), "blue")
+            self.__log.error(f"Failed to get image - got response {response} from url {url}")
         else:
             image = Image.open(BytesIO(response.content))
 
@@ -52,17 +55,24 @@ class TableDrawer:
         return self.__image_cache[url]
 
     async def user_image(self, user):
+        self.__log.debug(f"Getting image for user {user}")
         return await self.image_from_url(user.display_avatar.url)
 
     async def react_image(self, react):
+        self.__log.debug(f"Getting image for reaction {react}")
         if react.is_custom_emoji():
             return await self.image_from_url(react.emoji.url)
         else:
             emoji = react.emoji
-            # Strip out variant specifiers because they break twemoji
-            emoji = ''.join(ch for ch in react.emoji if ch not in ('\ufe0f', '\ufe0e'))
-            hex_code = '-'.join([format(ord(ch), 'x') for ch in emoji])
-            url = "https://twemoji.maxcdn.com/v/latest/72x72/" + hex_code + ".png"
+            unstripped_hex_code = '-'.join([format(ord(ch), 'x') for ch in emoji])
+            self.__log.debug(f"Unstripped hex: {unstripped_hex_code}")
+
+            hex_codes = [format(ord(ch), 'x') for ch in emoji]
+            # Strip out trailing variant specifiers because they break twemoji
+            if len(hex_codes) == 2 and hex_codes[-1] == 'fe0f':
+                hex_codes = hex_codes[:-1]
+            url = "https://twemoji.maxcdn.com/v/latest/72x72/" + '-'.join(hex_codes) + ".png"
+
             return await self.image_from_url(url)
 
     async def draw(self, table_data):
