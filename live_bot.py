@@ -35,13 +35,14 @@ class LiveBot(commands.Bot):
         self.__dump_channel = None
         self.__poll_timer = None
         coloredlogs.install(level='INFO', logger=self.__log)
-        super().__init__(*args, **kwargs)
+
+        intents = discord.Intents.default()
+        intents.message_content = True
+        intents.reactions = True
+        super().__init__(*args, intents=intents, **kwargs)
 
     async def __find_poll_message(self):
-        everyone_messages = await \
-            self.__channel.history(oldest_first=True)\
-            .filter(lambda m: self.poll_tag in m.content)\
-            .flatten()
+        everyone_messages = [m async for m in self.__channel.history(oldest_first=True) if self.poll_tag in m.content]
 
         if len(everyone_messages) == 1:
             return everyone_messages[0]
@@ -119,11 +120,9 @@ class LiveBot(commands.Bot):
         embed.set_image(url=image_url)
 
         await poll_message.edit(embed=embed)
-        dump_messages = (await self.__dump_channel.
-                                    history(oldest_first=True).
-                                    filter(lambda m: not m.is_system()).
-                                    flatten()
-                        )[:-1]
+        dump_messages = [m async for m in
+                self.__dump_channel.history(oldest_first=True) if not m.is_system()][:-1]
+
         for message in dump_messages:
             await message.delete()
         self.__log.info("Poll table successfully updated")
@@ -133,7 +132,7 @@ class LiveBot(commands.Bot):
         other_reacts = [r for r in poll_message.reactions if r.emoji not in (self.thumb_up, self.thumb_down)]
 
         if thumb_react:
-            attendees = await thumb_react.users().flatten()
+            attendees = [u async for u in thumb_react.users()]
         else:
             attendees = []
 
@@ -141,7 +140,7 @@ class LiveBot(commands.Bot):
 
         table_data = defaultdict(list)
         for react in other_reacts:
-            react_users = await react.users().flatten()
+            react_users = [u async for u in react.users()]
             for user in react_users:
                 table_data[user].append(react)
 
@@ -210,7 +209,8 @@ class LiveBot(commands.Bot):
 
     async def __reset_poll(self):
         self.__log.info("Resetting poll")
-        messages = (await self.__channel.history(oldest_first=True).filter(lambda m: not m.is_system()).flatten())[1:]
+        messages = [m async for m in self.__channel.history(oldest_first=True)
+                if not m.is_system()][1:]
         for message in messages:
             await message.delete()
         self.__poll_message_id = (await self.__create_poll_message()).id

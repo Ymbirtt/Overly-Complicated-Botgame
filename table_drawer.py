@@ -52,11 +52,11 @@ class TableDrawer:
         return self.__image_cache[url]
 
     async def user_image(self, user):
-        return await self.image_from_url(user.avatar_url)
+        return await self.image_from_url(user.display_avatar.url)
 
     async def react_image(self, react):
-        if react.custom_emoji:
-            return await self.image_from_url(react.emoji.url_as(format="png"))
+        if react.is_custom_emoji():
+            return await self.image_from_url(react.emoji.url)
         else:
             emoji = react.emoji
             # Strip out variant specifiers because they break twemoji
