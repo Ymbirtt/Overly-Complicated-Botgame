@@ -238,4 +238,18 @@ class LiveBot(commands.Bot):
             self.__log.critical("Couldn't find a poll message to watch for some reason!")
             raise RuntimeError("Couldn't find poll message")
 
+        if self.__role_id == 0:
+            self.__log.info("No role ID set, will ping @everyone")
+        else:
+            roles = await self.__guild.fetch_roles()
+            target_role = next((r for r in roles if r.id == self.__role_id), None)
+            if target_role:
+                self.__log.info(f"Will notify role @{target_role.name}")
+            else:
+                self.__log.critical(f"You've asked me to notify role ID {self.__role_id}, but I couldn't find any such role in this guild")
+                self.__log.critical("I found the following roles:")
+                for role in roles:
+                    self.__log.critical(f"{role.id}: {role.name}")
+                raise RuntimeError("Could not find role")
+
         self.__set_reset_timer()
