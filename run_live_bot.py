@@ -8,10 +8,11 @@ GUILD_ID = os.environ['OCB_GUILD_ID']
 CHANNEL_NAME = os.environ['OCB_CHANNEL_NAME']
 DUMP_CHANNEL_NAME = os.environ['OCB_DUMP_CHANNEL_NAME']
 ROLE_ID = os.environ.get('OCB_ROLE_ID', 0)
+LOG_LEVEL = os.environ.get('OCB_LOG_LEVEL', 'DEBUG')
 
 
 def main():
-    coloredlogs.install(level='DEBUG', logger=logging.getLogger('ocb'))
+    coloredlogs.install(level=LOG_LEVEL, logger=logging.getLogger('ocb'))
     bot = LiveBot(guild_id=int(GUILD_ID),
                   channel_name=CHANNEL_NAME,
                   dump_channel_name=DUMP_CHANNEL_NAME,

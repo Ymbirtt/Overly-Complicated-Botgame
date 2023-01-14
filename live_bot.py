@@ -1,5 +1,4 @@
 import logging
-import coloredlogs
 import parsedatetime
 import discord
 import ruamel.yaml
