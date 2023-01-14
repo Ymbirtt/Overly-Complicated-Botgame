@@ -4,10 +4,12 @@ import discord
 import ruamel.yaml
 import dateparser
 import random
+import json
 from datetime import datetime, timedelta
 from collections import defaultdict
-from aio_timers import Timer
+from pprint import pformat
 from io import BytesIO
+from aio_timers import Timer
 from discord.ext import commands
 
 from table_drawer import TableDrawer
@@ -18,6 +20,8 @@ discord.VoiceClient.warn_nacl = False
 class LiveBot(commands.Bot):
     polling_delay = 10
     poll_tag = "{poll}"
+    poll_image_tag = "{poll_image}"
+    poll_result_tag = "{poll_result}"
     last_game_date_str = "last thursday"
     next_game_date_str = "next thursday"
     next_poll_date_str = "next friday at 8:00AM"
@@ -115,15 +119,16 @@ class LiveBot(commands.Bot):
         table_file = discord.File(table_image_handle, "this_weeks_games.png")
 
         embed = discord.Embed()
-        message = await self.__dump_channel.send(files=[table_file])
+        message = await self.__dump_channel.send(content=self.poll_image_tag, files=[table_file])
         image_url = message.attachments[0].url
         embed.set_image(url=image_url)
 
         await poll_message.edit(embed=embed)
-        dump_messages = [m async for m in
-                self.__dump_channel.history(oldest_first=True) if not m.is_system()][:-1]
+        poll_image_messages = [m async for m in
+                self.__dump_channel.history(oldest_first=True) if not
+                m.is_system() and self.poll_image_tag in m.content][:-1]
 
-        for message in dump_messages:
+        for message in poll_image_messages:
             await message.delete()
         self.__log.info("Poll table successfully updated")
 
@@ -208,13 +213,40 @@ class LiveBot(commands.Bot):
         self.__log.info(f"Set timer to expire at around {next_poll_datetime} - {time_until_reset} seconds from now")
 
     async def __reset_poll(self):
-        self.__log.info("Resetting poll")
+        self.__log.info("Timer expired!")
+
+        await self.__stash_results()
+
+        self.__log.info("Deleting old poll")
         messages = [m async for m in self.__channel.history(oldest_first=True)
                 if not m.is_system()][1:]
         for message in messages:
             await message.delete()
         self.__poll_message_id = (await self.__create_poll_message()).id
         self.__set_reset_timer()
+
+    async def __stash_results(self):
+        self.__log.info("Stashing poll results")
+        poll_message = await self.__channel.fetch_message(self.__poll_message_id)
+        poll_data = await self.__generate_poll_data(poll_message)
+
+        self.__log.debug("Logging this poll data:")
+        self.__log.debug(pformat(poll_data))
+        jsonable_poll = {
+            "date": datetime.now().strftime("%Y-%m-%d"),
+            "poll_results": [
+                {
+                    "user_id": user.id,
+                    "votes": [v.emoji.name if v.is_custom_emoji() else v.emoji for v in votes],
+                }
+                for (user, votes) in poll_data.items()
+            ]
+        }
+        self.__log.info("Logging this data:")
+        self.__log.info(str(jsonable_poll))
+        json_data = json.dumps(jsonable_poll)
+
+        await self.__dump_channel.send(content="\n".join([self.poll_result_tag, json_data]))
 
     async def on_ready(self):
         self.__log.info("Connected!")
