@@ -1,5 +1,6 @@
 import os
 import logging
+import coloredlogs
 from live_bot import LiveBot
 
 TOKEN = os.environ['OCB_TOKEN']
@@ -10,6 +11,7 @@ ROLE_ID = os.environ.get('OCB_ROLE_ID', 0)
 
 
 def main():
+    coloredlogs.install(level='DEBUG', logger=logging.getLogger('ocb'))
     bot = LiveBot(guild_id=int(GUILD_ID),
                   channel_name=CHANNEL_NAME,
                   dump_channel_name=DUMP_CHANNEL_NAME,

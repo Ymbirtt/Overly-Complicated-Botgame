@@ -3,22 +3,20 @@ from io import BytesIO
 import logging
 import requests
 import math
-
-
-def get_react_name(react):
-    if react.custom_emoji:
-        return react.emoji.name
-    else:
-        return react.emoji
+import os
 
 
 class TableDrawer:
+    use_remote_emoji = False
+    emoji_dir = os.path.join("data", "emoji")
+    emoji_cdn_base = "https://twemoji.maxcdn.com/v/latest/72x72/"
+
     def __init__(self, padding_width=10, square_size=128, square_padding=5):
         self.__padding_width = padding_width
         self.__square_size = square_size
         self.__square_padding = square_padding
         self.__image_cache = {}
-        self.__log = logging.getLogger(__name__)
+        self.__log = logging.getLogger(f"ocb.{__name__}")
 
     @classmethod
     async def default_draw(cls, table_data):
@@ -42,10 +40,20 @@ class TableDrawer:
     async def image_from_url(self, url):
         if url in self.__image_cache:
             return self.__image_cache[url]
-        response = requests.get(url)
-        if not response.ok:
+
+        self.__log.debug(f"Getting image from url {url}")
+        try:
+            response = requests.get(url)
+            http_error = False
+        except Exception as e:
+            self.__log.error(f"Failed to even get an HTTP response from url {url}!")
+            self.__log.exception(e)
+            http_error = True
+
+        if http_error or not response.ok:
             image = Image.new('RGBA', (self.__square_size, self.__square_size), "blue")
-            self.__log.error(f"Failed to get image - got response {response} from url {url}")
+            if not http_error:
+                self.__log.error(f"Failed to get image - got response {response} from url {url}")
         else:
             image = Image.open(BytesIO(response.content))
 
@@ -63,17 +71,37 @@ class TableDrawer:
         if react.is_custom_emoji():
             return await self.image_from_url(react.emoji.url)
         else:
-            emoji = react.emoji
-            unstripped_hex_code = '-'.join([format(ord(ch), 'x') for ch in emoji])
-            self.__log.debug(f"Unstripped hex: {unstripped_hex_code}")
+            return await self.image_from_emoji(react.emoji)
 
-            hex_codes = [format(ord(ch), 'x') for ch in emoji]
-            # Strip out trailing variant specifiers because they break twemoji
-            if len(hex_codes) == 2 and hex_codes[-1] == 'fe0f':
-                hex_codes = hex_codes[:-1]
-            url = "https://twemoji.maxcdn.com/v/latest/72x72/" + '-'.join(hex_codes) + ".png"
+    async def image_from_emoji(self, emoji):
+        hex_codes = [format(ord(ch), 'x') for ch in emoji]
+        # Strip out trailing variant specifiers because they break twemoji
+        if len(hex_codes) == 2 and hex_codes[-1] == 'fe0f':
+            hex_codes = hex_codes[:-1]
 
+        filename = '-'.join(hex_codes) + ".png"
+
+        if self.use_remote_emoji:
+            url = self.emoji_cdn_base + filename
             return await self.image_from_url(url)
+        else:
+            filepath = os.path.join(self.emoji_dir, filename)
+            return await self.image_from_file(filepath)
+
+    async def image_from_file(self, filepath):
+        self.__log.debug(f"Getting image from path {filepath}")
+        try:
+            with open(filepath, 'rb') as f:
+                image = Image.open(f)
+                image.load()
+        except Exception as e:
+            image = Image.new('RGBA', (self.__square_size, self.__square_size), "blue")
+            self.__log.error("Failed to get image from file:")
+            self.__log.exception(e)
+
+        image.thumbnail((self.__square_size, self.__square_size))
+        image.convert("RGBA")
+        return image
 
     async def draw(self, table_data):
         games = set()

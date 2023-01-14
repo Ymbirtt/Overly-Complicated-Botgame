@@ -31,12 +31,11 @@ class LiveBot(commands.Bot):
         self.__channel_name = channel_name
         self.__dump_channel_name = dump_channel_name
         self.__role_id = role_id
-        self.__log = logging.getLogger(__name__)
+        self.__log = logging.getLogger(f"ocb.{__name__}")
         self.__guild = None
         self.__channel = None
         self.__dump_channel = None
         self.__poll_timer = None
-        coloredlogs.install(level='INFO', logger=self.__log)
 
         intents = discord.Intents.default()
         intents.message_content = True
