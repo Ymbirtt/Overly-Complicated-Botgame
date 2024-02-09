@@ -16,7 +16,7 @@ random_messages:
 - I liked that expansion, we should play it again
 - He is right, it's in an appendix
 - It's only German games where fun is optional
-- It's a kickstarter. I'll update you in 2022
+- "It's a kickstarter. I'll update you in {(datetime.now(pytz.utc) + timedelta(years=2)).year} # TODO: add templating support"
 - This is me prodding you guys to click the thing if you do want to come so I can
   make sure we've got space in the cafe next week
 - I like it when things I like have an impact on the world
@@ -33,5 +33,6 @@ random_messages:
   What, taking a massive bribe?
   Shut up, I got what I want.
 - "Germany _is_ the game component"
+- "So the tie breakers are 1, π, and ∞"
 
 default_message: Help! I've run out of messages! Someone give me some more!
