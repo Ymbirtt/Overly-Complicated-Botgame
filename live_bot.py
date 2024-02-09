@@ -6,6 +6,7 @@ import dateparser
 import random
 import json
 from datetime import datetime, timedelta
+import pytz
 from collections import defaultdict
 from pprint import pformat
 from io import BytesIO
@@ -213,7 +214,7 @@ class LiveBot(commands.Bot):
         self.__log.info(f"Set timer to expire at around {next_poll_datetime} - {time_until_reset} seconds from now")
 
     async def __reset_poll(self):
-        self.__log.info("Timer expired!")
+        self.__log.info("Resetting poll!")
 
         await self.__stash_results()
 
@@ -257,12 +258,16 @@ class LiveBot(commands.Bot):
         self.__log.info(f"Running in guild {self.__guild}, channel {self.__channel}, dump channel {self.__dump_channel}")
         poll_message = await self.__find_poll_message()
 
-        if poll_message:
-            self.__poll_message_id = poll_message.id
-            self.__log.info(f"Found poll message with ID: {self.__poll_message_id}")
-        else:
+        if not poll_message:
             self.__log.info("Didn't find a poll message on startup, posting a new one")
             self.__poll_message_id = (await self.__create_poll_message()).id
+        elif datetime.now(pytz.utc) - poll_message.created_at > timedelta(days=7):
+            self.__poll_message_id = poll_message.id
+            self.__log.info("Found a poll message on startup, but it is more than 7 days old - resetting")
+            await self.__reset_poll()
+        else:
+            self.__poll_message_id = poll_message.id
+            self.__log.info(f"Found poll message with ID: {self.__poll_message_id}, created {poll_message.created_at}")
 
         if self.__poll_message_id is None:
             self.__log.critical("Couldn't find a poll message to watch for some reason!")
