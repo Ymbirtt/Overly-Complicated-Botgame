@@ -88,14 +88,14 @@ class LiveBot(commands.Bot):
         if reaction_event.message_id != self.__poll_message_id:
             return
 
-        self.__log.debug(f"{reaction_event.emoji} removed")
+        self.__log.info(f"{reaction_event.emoji} removed")
         await self.__handle_reaction_change(reaction_event)
 
     async def on_raw_reaction_add(self, reaction_event):
         if reaction_event.message_id != self.__poll_message_id:
             return
 
-        self.__log.debug(f"{reaction_event.member.name} reacted with {reaction_event.emoji}")
+        self.__log.info(f"{reaction_event.member.name} reacted with {reaction_event.emoji}")
         await self.__handle_reaction_change(reaction_event)
 
     async def __handle_reaction_change(self, reaction_event):
@@ -111,7 +111,7 @@ class LiveBot(commands.Bot):
         self.__log.info("Updating poll table now")
         poll_message = await self.__channel.fetch_message(self.__poll_message_id)
         poll_data = await self.__generate_poll_data(poll_message)
-        self.__log.debug(f"Got poll data: {poll_data}")
+        self.__log.info(f"Got poll data: {poll_data}")
 
         table_image = await TableDrawer.default_draw(poll_data)
         table_image_handle = BytesIO()
@@ -224,6 +224,7 @@ class LiveBot(commands.Bot):
         for message in messages:
             await message.delete()
         self.__poll_message_id = (await self.__create_poll_message()).id
+        self.__log.info(f"Created new poll - message ID {self.__poll_message_id}")
         self.__set_reset_timer()
 
     async def __stash_results(self):
@@ -231,8 +232,8 @@ class LiveBot(commands.Bot):
         poll_message = await self.__channel.fetch_message(self.__poll_message_id)
         poll_data = await self.__generate_poll_data(poll_message)
 
-        self.__log.debug("Logging this poll data:")
-        self.__log.debug(pformat(poll_data))
+        self.__log.info("Logging this poll data:")
+        self.__log.info(pformat(poll_data))
         jsonable_poll = {
             "date": datetime.now().strftime("%Y-%m-%d"),
             "poll_results": [
