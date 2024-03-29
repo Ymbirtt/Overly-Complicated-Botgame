@@ -79,8 +79,12 @@ class LiveBot(commands.Bot):
         message = "\n".join([message_header, message_body, "", message_footer])
 
         ret = await self.__channel.send(message)
-        with open(self.poll_message_file, 'w') as f:
-            f.write(ruamel.yaml.dump(new_messages_content, Dumper=ruamel.yaml.RoundTripDumper))
+        try:
+            with open(self.poll_message_file, 'w') as f:
+                f.write(ruamel.yaml.dump(new_messages_content, Dumper=ruamel.yaml.RoundTripDumper))
+        except Exception as e:
+            self.__log.error(f"Couldn't open {self.poll_mesage_file} to write the new poll message file")
+            self.__log.exception(e)
 
         return ret
 
