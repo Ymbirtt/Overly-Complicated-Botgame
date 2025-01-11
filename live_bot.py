@@ -133,10 +133,10 @@ class LiveBot(commands.Bot):
 
         await poll_message.edit(embed=embed)
         poll_image_messages = [m async for m in
-                self.__dump_channel.history(oldest_first=True) if not
-                m.is_system() and self.poll_image_tag in m.content][:-1]
+                self.__dump_channel.history(oldest_first=False) if not
+                m.is_system() and self.poll_image_tag in m.content][1:]
 
-        self.__log.debug(f"Found {len(poll_image_messages)} old poll images - deleting")
+        self.__log.info(f"Found {len(poll_image_messages)} old poll images - deleting")
 
         for message in poll_image_messages:
             await message.delete()
