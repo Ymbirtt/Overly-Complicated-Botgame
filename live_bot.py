@@ -96,6 +96,9 @@ class LiveBot(commands.Bot):
         await self.__handle_reaction_change(reaction_event)
 
     async def on_raw_reaction_add(self, reaction_event):
+        if self.__poll_message_id is None:
+            self.__log.warning("Found a reaction, but no poll message exists. Something is going wrong!")
+
         if reaction_event.message_id != self.__poll_message_id:
             return
 
@@ -132,6 +135,8 @@ class LiveBot(commands.Bot):
         poll_image_messages = [m async for m in
                 self.__dump_channel.history(oldest_first=True) if not
                 m.is_system() and self.poll_image_tag in m.content][:-1]
+
+        self.__log.debug(f"Found {len(poll_image_messages)} old poll images - deleting")
 
         for message in poll_image_messages:
             await message.delete()
@@ -178,7 +183,7 @@ class LiveBot(commands.Bot):
                 del messages["scheduled_messages"][msg_index]
                 return (message, messages)
 
-        if messages["random_messages"]:
+        if len(messages["random_messages"]) > 0:
             random_msg_index = random.randint(0, len(messages["random_messages"]))
             message = messages["random_messages"][random_msg_index]
             del messages["random_messages"][random_msg_index]
@@ -256,6 +261,7 @@ class LiveBot(commands.Bot):
 
     async def on_ready(self):
         self.__log.info("Connected!")
+        self.__poll_message_id = None
         self.__guild = self.get_guild(self.__guild_id)
         channels = self.__guild.channels
         self.__channel = next(c for c in channels if c.name == self.__channel_name)
