@@ -74,11 +74,15 @@ class TableDrawer:
             return await self.image_from_emoji(react.emoji)
 
     async def image_from_emoji(self, emoji):
-        hex_codes = [format(ord(ch), 'x') for ch in emoji]
+        codepoints = [ord(ch) for ch in emoji]
         # Strip out trailing variant specifiers because they break twemoji
-        if len(hex_codes) == 2 and hex_codes[-1] == 'fe0f':
-            hex_codes = hex_codes[:-1]
+        if len(codepoints) == 2 and codepoints[-1] == 0xfe0f:
+            codepoints = codepoints[:-1]
 
+        if 0x30 <= codepoints[0] <= 0x39 and codepoints[1] == 0xfe0f:
+            del codepoints[1]
+
+        hex_codes = [format(cp, 'x') for cp in codepoints]
         filename = '-'.join(hex_codes) + ".png"
 
         if self.use_remote_emoji:
