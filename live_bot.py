@@ -184,7 +184,7 @@ class LiveBot(commands.Bot):
                 return (message, messages)
 
         if len(messages["random_messages"]) > 0:
-            random_msg_index = random.randint(0, len(messages["random_messages"]))
+            random_msg_index = random.randrange(0, len(messages["random_messages"]))
             message = messages["random_messages"][random_msg_index]
             del messages["random_messages"][random_msg_index]
             return message, messages
