@@ -38,5 +38,9 @@ random_messages:
 - "If it's boring enough you can make a eurogame for it"
 - "I'm just trying to extort you! Why are you so against this!?"
 - "I'm in my peasmaxxing era"
+- |-
+  "\"Wow, what are you making?\""
+  "\"A mistake, apparently...\""
+- "I swear to god, if you move that lamp I will have your firstborn child just so I can kill it out of spite"
 
 default_message: Help! I've run out of messages! Someone give me some more!
